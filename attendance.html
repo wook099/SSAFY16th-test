@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석체크 - 장덕동 카공 지도</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-[#fbf9f6] text-[#2d2620] antialiased">
+    <nav class="sticky top-0 z-30 border-b border-[#ede5dc] bg-white/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <a href="index.html" class="flex items-center gap-2 text-lg font-black tracking-tight text-[#8c6239]">
+                <svg class="h-6 w-6 fill-[#8c6239]" viewBox="0 0 24 24"><path d="M2 21h18v-2H2v2M20 8h-2V5h2v3M4 19h12v-4H4v4m0-6h12V9H4v4m0-6h12V5H4v2m16-4H2v14h18v-3h2V5c0-1.1-.9-2-2-2z"/></svg>
+                <span>Cafe & Code</span>
+            </a>
+            <ul class="hidden items-center gap-2 text-sm font-semibold md:flex">
+                <li><a href="index.html" class="rounded-lg px-4 py-2 text-[#6e6256] transition hover:bg-[#f5ece3] hover:text-[#8c6239]">홈</a></li>
+                <li><a href="attendance.html" class="rounded-lg bg-[#f5ece3] px-4 py-2 text-[#8c6239]">출석체크</a></li>
+                <li><a href="feed.html" class="rounded-lg px-4 py-2 text-[#6e6256] transition hover:bg-[#f5ece3] hover:text-[#8c6239]">실시간 피드</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <section class="rounded-[28px] border border-[#ede5dc] bg-white p-6 shadow-[0_10px_30px_rgba(140,98,57,0.06)] sm:p-8">
+            <div class="mb-6 text-center">
+                <p class="mb-3 inline-flex rounded-full bg-[#f5ece3] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#8c6239]">TODAY</p>
+                <h2 class="text-2xl font-black tracking-tight text-[#2d2620]">🌱 오늘의 공부 기록 심기</h2>
+                <p class="mt-2 text-sm leading-6 text-[#6e6256]">아지트에 도착하셨나요? 버튼을 눌러 출석을 완료하세요.</p>
+            </div>
+            <div class="flex justify-center">
+                <button class="rounded-full bg-[#8c6239] px-8 py-4 text-base font-bold text-white shadow-lg transition hover:bg-[#6d4b2a] active:scale-[0.98]" onclick="alert('오늘의 카공 잔디가 성공적으로 심어졌습니다!')">지금 출석체크하기</button>
+            </div>
+        </section>
+
+        <section class="rounded-[28px] border border-[#ede5dc] bg-white p-6 shadow-[0_10px_30px_rgba(140,98,57,0.06)] sm:p-8">
+            <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h3 class="text-xl font-black text-[#2d2620]">이달의 카공 잔디 현황</h3>
+                    <p class="text-sm text-[#6e6256]">매일의 몰입이 한 줄기의 초록색 자취로 남습니다.</p>
+                </div>
+                <span class="inline-flex rounded-full bg-[#e8f5ea] px-3 py-1 text-sm font-bold text-[#2da44e]">총 12일 성공 🔥</span>
+            </div>
+
+            <div class="overflow-x-auto pb-2">
+                <div id="grass-grid" class="mx-auto grid w-max grid-cols-7 gap-2"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const grassGrid = document.getElementById('grass-grid');
+        for (let i = 0; i < 28; i++) {
+            const cell = document.createElement('div');
+            cell.className = `h-3.5 w-3.5 rounded-[3px] ${Math.random() > 0.4 ? 'bg-[#2da44e]' : 'bg-[#ebedf0]'}`;
+            grassGrid.appendChild(cell);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 피드 - 장덕동 카공 지도</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-[#fbf9f6] text-[#2d2620] antialiased">
+    <nav class="sticky top-0 z-30 border-b border-[#ede5dc] bg-white/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <a href="index.html" class="flex items-center gap-2 text-lg font-black tracking-tight text-[#8c6239]">
+                <svg class="h-6 w-6 fill-[#8c6239]" viewBox="0 0 24 24"><path d="M2 21h18v-2H2v2M20 8h-2V5h2v3M4 19h12v-4H4v4m0-6h12V9H4v4m0-6h12V5H4v2m16-4H2v14h18v-3h2V5c0-1.1-.9-2-2-2z"/></svg>
+                <span>Cafe & Code</span>
+            </a>
+            <ul class="hidden items-center gap-2 text-sm font-semibold md:flex">
+                <li><a href="index.html" class="rounded-lg px-4 py-2 text-[#6e6256] transition hover:bg-[#f5ece3] hover:text-[#8c6239]">홈</a></li>
+                <li><a href="attendance.html" class="rounded-lg px-4 py-2 text-[#6e6256] transition hover:bg-[#f5ece3] hover:text-[#8c6239]">출석체크</a></li>
+                <li><a href="feed.html" class="rounded-lg bg-[#f5ece3] px-4 py-2 text-[#8c6239]">실시간 피드</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="mb-2 inline-flex rounded-full bg-[#f5ece3] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#8c6239]">COMMUNITY</p>
+                <h2 class="text-2xl font-black tracking-tight text-[#2d2620]">카공러들의 실시간 한줄평 모음</h2>
+            </div>
+            <button onclick="openModal()" class="rounded-full bg-[#8c6239] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#6d4b2a]">한줄평 쓰기</button>
+        </div>
+
+        <div class="space-y-4">
+            <article class="rounded-[24px] border border-[#ede5dc] bg-white p-5 shadow-[0_10px_30px_rgba(140,98,57,0.04)]">
+                <div class="mb-3 flex items-center justify-between text-sm text-[#6e6256]">
+                    <span class="font-bold text-[#8c6239]">카페 장덕동 101</span>
+                    <span>방금 전</span>
+                </div>
+                <p class="leading-7 text-[#2d2620]">대형 테이블 쪽은 주말인데도 빈자리가 가끔 나네요! 와이파이 속도 엄청 빠르고 코딩하기 정말 좋습니다. 👍</p>
+            </article>
+
+            <article class="rounded-[24px] border border-[#ede5dc] bg-white p-5 shadow-[0_10px_30px_rgba(140,98,57,0.04)]">
+                <div class="mb-3 flex items-center justify-between text-sm text-[#6e6256]">
+                    <span class="font-bold text-[#8c6239]">코드 브루</span>
+                    <span>2시간 전</span>
+                </div>
+                <p class="leading-7 text-[#2d2620]">구석 1인석 선점 성공! 백색 소음이 아주 잔잔해서 집중이 최고조로 잘 되네요. 에어컨이 조금 빵빵하니 얇은 외투 챙기세요!</p>
+            </article>
+        </div>
+    </main>
+
+    <div id="writeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+        <div class="w-full max-w-xl rounded-[28px] border border-[#ede5dc] bg-white p-6 shadow-2xl sm:p-8">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#8c6239]">WRITE</p>
+                    <h3 class="text-xl font-black text-[#2d2620]">생생 카공 한줄평 작성하기</h3>
+                </div>
+                <button onclick="closeModal()" class="text-2xl font-bold text-[#9e9185] transition hover:text-[#2d2620]">×</button>
+            </div>
+            <textarea class="mb-5 h-32 w-full resize-none rounded-2xl border border-[#ede5dc] bg-[#fbf9f6] px-4 py-3 text-sm text-[#2d2620] outline-none transition focus:border-[#8c6239]" placeholder="현재 계신 카페의 실시간 정보(콘센트 상태, 소음, 빈자리 등)를 공유해 주세요!"></textarea>
+            <div class="flex justify-end gap-2">
+                <button class="rounded-xl bg-[#f5ece3] px-4 py-2 text-sm font-semibold text-[#6e6256] transition hover:bg-[#ede5dc]" onclick="closeModal()">취소</button>
+                <button class="rounded-xl bg-[#8c6239] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#6d4b2a]" onclick="alert('리뷰가 등록되었습니다!'); closeModal();">등록하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('writeModal');
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'write') {
+            openModal();
+        }
+    </script>
+</body>
+</html>

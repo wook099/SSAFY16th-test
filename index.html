@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장덕동 카공 지도 (Cafe & Code Premium 2.0)</title>
+    <!-- Pretendard 고품질 폰트 로드 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <!-- Tailwind CSS 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Swiper.js 슬라이더 라이브러리 CDN 로드 (무한 스와이프 지원) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #fbf9f6;
+            --card-bg: #ffffff;
+            --text-primary: #2d2620;
+            --text-secondary: #6e6256;
+            --text-muted: #9e9185;
+            --primary: #8c6239;
+            --primary-hover: #6d4b2a;
+            --primary-light: #f5ece3;
+            --accent: #dcae80;
+            --border-color: #ede5dc;
+            --shadow-sm: 0 2px 8px rgba(140, 98, 57, 0.04);
+            --shadow-md: 0 8px 24px rgba(140, 98, 57, 0.08);
+            --shadow-lg: 0 16px 32px rgba(140, 98, 57, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --heart-color: #ff4b4b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-bottom: 74px; /* 모바일 하단 내비게이션 영역 확보 */
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 0;
+            }
+        }
+
+        /* 가상 페이지 전환 애니메이션 */
+        .page-section {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page-section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(237, 229, 220, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* 네비게이션 디자인 */
+        nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-link-item {
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .nav-link-item.active-nav {
+            color: var(--primary) !important;
+            font-weight: 800;
+        }
+
+        .nav-link-item.active-nav::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Swiper 슬라이더 디자인 */
+        .swiper {
+            width: 100%;
+            padding: 10px 4px 24px !important;
+        }
+
+        /* 카페 카드 기본 인터랙션 */
+        .cafe-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            height: 100%;
+        }
+
+        .cafe-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent);
+        }
+
+        .cafe-img-wrapper {
+            position: relative;
+            height: 190px;
+            overflow: hidden;
+            background: #e5dec9;
+        }
+
+        .cafe-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .cafe-card:hover .cafe-img {
+            transform: scale(1.05);
+        }
+
+        /* 즐겨찾기 하트 아이콘 피드백 */
+        .bookmark-btn {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .bookmark-btn:hover {
+            transform: scale(1.1);
+            background: #ffffff;
+        }
+
+        .bookmark-btn.active svg {
+            fill: var(--heart-color);
+            animation: heartBeat 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* 🚦 크라우드 소싱 간이 인디케이터 */
+        .live-indicators {
+            display: flex;
+            gap: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding: 6px 10px;
+            background: var(--bg-color);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border-color);
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .dot-green { background: #10b981; }
+        .dot-yellow { background: #f59e0b; }
+        .dot-red { background: #ef4444; }
+
+        /* 🌱 잔디판 디자인 */
+        .grass-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-rows: repeat(7, 11px);
+            gap: 3px;
+            width: max-content;
+        }
+
+        .grass-cell {
+            width: 11px;
+            height: 11px;
+            border-radius: 2px;
+            background-color: #ede5dc;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .grass-cell:hover::after {
+            content: attr(data-date) ": " attr(data-count) "회 출석";
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d2620;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .grass-level-0 { background-color: #ede5dc; }
+        .grass-level-1 { background-color: #c6e2b8; }
+        .grass-level-2 { background-color: #96c28d; }
+        .grass-level-3 { background-color: #6a9c5f; }
+        .grass-level-4 { background-color: #426b3a; }
+
+        /* 클릭 가능한 별점 기능 */
+        .rating-star {
+            font-size: 1.8rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.15s ease-in-out, transform 0.1s;
+        }
+        .rating-star:hover {
+            transform: scale(1.1);
+        }
+        .rating-star.selected {
+            color: #ffb800;
+        }
+
+        /* 상세 스펙 모달 전용 */
+        .modal {
+            background-color: rgba(45, 38, 32, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* 토스트 */
+        .toast-container {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(45, 38, 32, 0.95);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            padding: 14px 28px;
+            border-radius: 40px;
+            box-shadow: var(--shadow-lg);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            .toast-container {
+                bottom: 24px;
+            }
+        }
+
+        .toast-container.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-[#fbf9f6] text-[#2d2620]">
+
+    <!-- 데스크탑 상단 네비게이션 -->
+    <nav class="sticky top-0 bg-white/90 backdrop-blur-md border-b border-[#ede5dc] py-4 px-6 flex justify-between items-center z-50">
+        <div class="logo flex items-center gap-2 font-extrabold text-[#8c6239] text-xl tracking-tight cursor-pointer" onclick="navigate('home')">
+            <svg class="w-6 h-6 fill-[#8c6239]" viewBox="0 0 24 24">
+                <path d="M2 21h18v-2H2v2M20 8h-2V5h2v3M4 19h12v-4H4v4m0-6h12V9H4v4m0-6h12V5H4v2m16-4H2v14h18v-3h2V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <span>Cafe & Code</span>
+        </div>
+        <ul class="hidden md:flex items-center gap-2 list-none text-sm font-semibold">
+            <li><a id="nav-home" class="nav-link-item text-[#6e6256] hover:text-[#8c6239] px-4 py-2 rounded-lg cursor-pointer" onclick="navigate('home')">공간 탐색</a></li>
+            <li><a id="nav-reviews" class="nav-link-item text-[#6e6256] hover:text-[#8c6239] px-4 py-2 rounded-lg cursor-pointer" onclick="navigate('reviews')">리뷰 피드</a></li>
+            <li><a id="nav-garden" class="nav-link-item text-[#6e6256] hover:text-[#8c6239] px-4 py-2 rounded-lg cursor-pointer" onclick="navigate('garden')">출석 잔디밭</a></li>
+            <li><a id="nav-write" class="bg-[#8c6239] hover:bg-[#6d4b2a] text-white px-4 py-2 rounded-xl cursor-pointer transition-all duration-200 ml-2" onclick="navigate('write')">생생 리뷰 쓰기</a></li>
+        </ul>
+    </nav>
+
+    <!-- 모바일 하단 네비게이션 바 -->
+    <div class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-lg border-t border-[#ede5dc] py-3.5 px-2 flex justify-around items-center z-50 md:hidden shadow-[0_-2px_12px_rgba(140,98,57,0.06)]">
+        <button id="m-nav-home" onclick="navigate('home')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-[#6e6256] w-20 transition-all">
+            <span class="text-xl">🏡</span>
+            <span>공간 탐색</span>
+        </button>
+        <button id="m-nav-reviews" onclick="navigate('reviews')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-[#6e6256] w-20 transition-all">
+            <span class="text-xl">💬</span>
+            <span>리뷰 피드</span>
+        </button>
+        <button id="m-nav-write" onclick="navigate('write')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-[#6e6256] w-20 transition-all">
+            <span class="text-xl">✍️</span>
+            <span>리뷰 쓰기</span>
+        </button>
+        <button id="m-nav-garden" onclick="navigate('garden')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-[#6e6256] w-20 transition-all">
+            <span class="text-xl">🌱</span>
+            <span>나의 잔디</span>
+        </button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- [PAGE 1] HOME PAGE (#home) -->
+    <!-- ============================================== -->
+    <section id="page-home" class="page-section hidden">
+        <!-- 프리미엄 헤더 -->
+        <header class="relative bg-[linear-gradient(135deg,rgba(45,38,32,0.85),rgba(140,98,57,0.6)),url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1600')] bg-no-repeat bg-center bg-cover h-[34vh] min-h-[240px] flex flex-col justify-center items-center text-center text-white px-5 py-8 overflow-hidden">
+            <h1 class="text-3xl md:text-5xl font-black mb-3 tracking-tight drop-shadow-md">광주 장덕동 카공 지도</h1>
+            <p class="text-sm md:text-base font-light text-[#f7ede2] max-w-[600px] drop-shadow-sm">코딩과 작업을 위해 최적화된 골목 구석구석 보물 같은 공간 아카이브 💻</p>
+            <div class="absolute bottom-0 left-0 w-full h-[30px] bg-gradient-to-t from-[#fbf9f6] to-transparent"></div>
+        </header>
+
+        <main class="max-w-[1280px] mx-auto px-6 pb-20">
+            <!-- 통합 스마트 검색 창 및 디테일 태그 필터 -->
+            <section class="max-w-[680px] mx-auto -mt-12 mb-10 relative z-10 bg-white p-4 rounded-2xl shadow-xl border border-[#ede5dc]">
+                <div class="relative flex items-center">
+                    <svg class="absolute left-4 w-5 h-5 fill-[#9e9185] pointer-events-none" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" id="smart-search" class="w-full pl-11 pr-4 py-3 border border-[#ede5dc] rounded-lg bg-[#fbf9f6] text-base focus:border-[#8c6239] focus:bg-white focus:ring-2 focus:ring-[#8c6239]/15 transition-all outline-none" placeholder="카페명, 주소를 입력하세요... (실시간 자동 매칭)" oninput="handleSearch()">
+                </div>
+                <div class="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-thin" id="tag-pills-container">
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#콘센트많음', this)">🔌 #콘센트많음</span>
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#주차가능', this)">🚗 #주차가능</span>
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#24시간', this)">🌙 #24시간</span>
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#디카페인', this)">☕ #디카페인</span>
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#대형테이블', this)">🖥️ #대형테이블</span>
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#소형개인석', this)">🪑 #소형개인석</span>
+                    <span class="tag-pill bg-[#fbf9f6] border border-[#ede5dc] text-[#6e6256] text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer whitespace-nowrap transition-all hover:bg-[#f5ece3] hover:text-[#8c6239]" onclick="toggleTagFilter('#조용함', this)">🔇 #조용함</span>
+                </div>
+            </section>
+
+            <!-- 필터 타이틀 및 탭 -->
+            <div class="w-full overflow-x-auto flex justify-center mb-8 pb-1 scrollbar-none">
+                <section class="inline-flex gap-1.5 p-1 bg-[#f1ebd8] rounded-full shadow-inner">
+                    <button class="filter-btn bg-white text-[#8c6239] shadow-sm rounded-full text-xs md:text-sm font-bold px-4 md:px-6 py-2.5 whitespace-nowrap transition-all" id="filter-btn-all" onclick="filterCafes('all', this)">
+                        📍 전체 테마
+                    </button>
+                    <button class="filter-btn text-[#6e6256] hover:text-[#8c6239] rounded-full text-xs md:text-sm font-bold px-4 md:px-6 py-2.5 whitespace-nowrap transition-all" onclick="filterCafes('focus', this)">
+                        🔥 대형 & 집중형
+                    </button>
+                    <button class="filter-btn text-[#6e6256] hover:text-[#8c6239] rounded-full text-xs md:text-sm font-bold px-4 md:px-6 py-2.5 whitespace-nowrap transition-all" onclick="filterCafes('mood', this)">
+                        🌿 감성 & 리프레시
+                    </button>
+                    <button class="filter-btn text-[#6e6256] hover:text-[#8c6239] rounded-full text-xs md:text-sm font-bold px-4 md:px-6 py-2.5 whitespace-nowrap transition-all" onclick="filterCafes('bakery', this)">
+                        🍰 디저트 맛집
+                    </button>
+                    <button class="filter-btn text-[#6e6256] hover:text-[#8c6239] rounded-full text-xs md:text-sm font-bold px-4 md:px-6 py-2.5 whitespace-nowrap transition-all" id="filter-btn-bookmark" onclick="filterCafes('bookmark', this)">
+                        💖 나만의 아지트
+                    </button>
+                </section>
+            </div>
+
+            <!-- 통합 검색 & 북마크 결과 뷰 -->
+            <section class="results-section hidden mb-10" id="results-view">
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <h3 class="text-lg font-bold text-[#2d2620]" id="results-title">🔍 실시간 필터링 결과 <span class="text-xs bg-[#f5ece3] text-[#8c6239] px-2 py-1 rounded-full font-bold ml-1">0개 발견</span></h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="results-grid-container">
+                    <!-- 동적 검색 결과 카드 매칭 처리 -->
+                </div>
+            </section>
+
+            <!-- 카테고리 1: 대형 & 집중형 -->
+            <section class="category-block mb-10" id="category-focus">
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <h3 class="text-xl font-extrabold text-[#2d2620] flex items-center gap-2">🔥 대형 & 초집중형 공간 <span class="text-xs bg-[#f5ece3] text-[#8c6239] px-2 py-1 rounded-full font-bold">초집중 보장</span></h3>
+                    <div class="flex gap-2">
+                        <button class="btn-prev-focus w-9 h-9 rounded-full bg-white border border-[#ede5dc] flex items-center justify-center hover:bg-[#8c6239] hover:text-white transition-all shadow-sm">◀</button>
+                        <button class="btn-next-focus w-9 h-9 rounded-full bg-white border border-[#ede5dc] flex items-center justify-center hover:bg-[#8c6239] hover:text-white transition-all shadow-sm">▶</button>
+                    </div>
+                </div>
+                <div class="swiper" id="viewport-focus">
+                    <div class="swiper-wrapper" id="swiper-wrapper-focus"></div>
+                </div>
+            </section>
+
+            <!-- 카테고리 2: 감성 & 리프레시 -->
+            <section class="category-block mb-10" id="category-mood">
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <h3 class="text-xl font-extrabold text-[#2d2620] flex items-center gap-2">🌿 감성 & 리프레시 <span class="text-xs bg-[#f5ece3] text-[#8c6239] px-2 py-1 rounded-full font-bold">아이디어 샘솟음</span></h3>
+                    <div class="flex gap-2">
+                        <button class="btn-prev-mood w-9 h-9 rounded-full bg-white border border-[#ede5dc] flex items-center justify-center hover:bg-[#8c6239] hover:text-white transition-all shadow-sm">◀</button>
+                        <button class="btn-next-mood w-9 h-9 rounded-full bg-white border border-[#ede5dc] flex items-center justify-center hover:bg-[#8c6239] hover:text-white transition-all shadow-sm">▶</button>
+                    </div>
+                </div>
+                <div class="swiper" id="viewport-mood">
+                    <div class="swiper-wrapper" id="swiper-wrapper-mood"></div>
+                </div>
+            </section>
+
+            <!-- 카테고리 3: 디저트 맛집 -->
+            <section class="category-block mb-10" id="category-bakery">
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <h3 class="text-xl font-extrabold text-[#2d2620] flex items-center gap-2">🍰 당 충전 디저트 맛집 <span class="text-xs bg-[#f5ece3] text-[#8c6239] px-2 py-1 rounded-full font-bold">달콤함 가득</span></h3>
+                    <div class="flex gap-2">
+                        <button class="btn-prev-bakery w-9 h-9 rounded-full bg-white border border-[#ede5dc] flex items-center justify-center hover:bg-[#8c6239] hover:text-white transition-all shadow-sm">◀</button>
+                        <button class="btn-next-bakery w-9 h-9 rounded-full bg-white border border-[#ede5dc] flex items-center justify-center hover:bg-[#8c6239] hover:text-white transition-all shadow-sm">▶</button>
+                    </div>
+                </div>
+                <div class="swiper" id="viewport-bakery">
+                    <div class="swiper-wrapper" id="swiper-wrapper-bakery"></div>
+                </div>
+            </section>
+        </main>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- [PAGE 2] REVIEWS FEED PAGE (#reviews) -->
+    <!-- ============================================== -->
+    <section id="page-reviews" class="page-section hidden">
+        <header class="bg-[#8c6239]/10 border-b border-[#ede5dc] py-10 px-6 text-center">
+            <span class="text-xs font-bold text-[#8c6239] tracking-wider uppercase bg-[#f5ece3] px-3 py-1 rounded-full">COMMUNITY</span>
+            <h2 class="text-3xl font-black text-[#2d2620] mt-3 tracking-tight">생생 카공 한줄평 피드</h2>
+            <p class="text-sm text-[#6e6256] mt-1 max-w-[600px] mx-auto">장덕동 카공 지도를 이용하는 로컬 웹 개발자와 학생들의 내돈내산 매장 정보 공유망</p>
+        </header>
+
+        <main class="max-w-[960px] mx-auto px-6 py-10">
+            <!-- 리뷰 페이지 전용 통계 & 정보 위젯 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-5 rounded-2xl border border-[#ede5dc] flex items-center gap-4">
+                    <span class="text-3xl">💬</span>
+                    <div>
+                        <p class="text-xs text-[#9e9185] font-semibold">누적 한줄평 수</p>
+                        <p class="text-xl font-extrabold text-[#2d2620]" id="widget-total-reviews">0개</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-[#ede5dc] flex items-center gap-4">
+                    <span class="text-3xl">⭐</span>
+                    <div>
+                        <p class="text-xs text-[#9e9185] font-semibold">평균 개발 편의성</p>
+                        <p class="text-xl font-extrabold text-[#2d2620]">4.6 / 5.0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-[#ede5dc] flex items-center gap-4">
+                    <span class="text-3xl">🏆</span>
+                    <div>
+                        <p class="text-xs text-[#9e9185] font-semibold">이번 주 핫 플레이스</p>
+                        <p class="text-sm font-extrabold text-[#8c6239]">할리스 광주장덕점</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 리뷰 필터링 및 컨트롤러 -->
+            <div class="bg-white p-4 rounded-2xl border border-[#ede5dc] flex flex-col md:flex-row gap-3 items-center justify-between mb-6">
+                <div class="relative w-full md:w-72">
+                    <svg class="absolute left-3 w-4 h-4 fill-[#9e9185] pointer-events-none top-3" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" id="reviews-search-input" class="w-full pl-9 pr-4 py-2 border border-[#ede5dc] rounded-xl text-sm focus:outline-none focus:border-[#8c6239] transition-all" placeholder="특정 카페 이름 검색..." oninput="renderReviews()">
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <span class="text-xs text-[#6e6256] font-bold">정렬:</span>
+                    <select id="reviews-sort-select" onchange="renderReviews()" class="px-3 py-2 border border-[#ede5dc] rounded-xl text-xs font-semibold text-[#6e6256] focus:outline-none bg-[#fbf9f6]">
+                        <option value="latest">최신 등록순</option>
+                        <option value="high-score">만족도 높은순</option>
+                        <option value="low-score">만족도 낮은순</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="reviews-list-container">
+                <!-- 동적으로 추가되는 리뷰 카드 목록 -->
+            </div>
+        </main>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- [PAGE 3] WRITE REVIEW PAGE (#write) -->
+    <!-- ============================================== -->
+    <section id="page-write" class="page-section hidden">
+        <main class="max-w-[620px] mx-auto px-6 py-12">
+            <div class="bg-white border border-[#ede5dc] rounded-3xl p-6 md:p-10 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-[#8c6239]"></div>
+                
+                <h3 class="text-2xl font-extrabold text-[#2d2620] mb-1 flex items-center gap-2">
+                    <span>✍️</span> 카공 장소 솔직 후기 작성
+                </h3>
+                <p class="text-xs text-[#9e9185] mb-6">직접 좌석에 앉아 겪은 플러그 접근성, 소음도, 서비스 눈치 여부를 솔직하게 기록해 보세요.</p>
+                
+                <form class="space-y-5" onsubmit="submitNewReview(event)">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-[#6e6256]">리뷰 대상 카페 선택</label>
+                        <select id="write-cafe-select" class="px-4 py-3 border border-[#ede5dc] rounded-lg bg-[#fbf9f6] text-sm focus:outline-none focus:border-[#8c6239] focus:bg-white transition-all font-semibold text-[#2d2620]" required>
+                            <!-- Dynamic options -->
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-[#6e6256] mb-1">작업 만족도 평점</label>
+                        <div class="flex items-center gap-1.5" id="interactive-star-container">
+                            <span class="rating-star" data-value="1" onclick="setWriteRating(1)">★</span>
+                            <span class="rating-star" data-value="2" onclick="setWriteRating(2)">★</span>
+                            <span class="rating-star" data-value="3" onclick="setWriteRating(3)">★</span>
+                            <span class="rating-star" data-value="4" onclick="setWriteRating(4)">★</span>
+                            <span class="rating-star" data-value="5" onclick="setWriteRating(5)">★</span>
+                            <span class="text-xs font-bold text-[#8c6239] ml-2" id="star-score-text">선택해 주세요</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-[#6e6256]">작성자 별명</label>
+                        <input type="text" id="write-cafe-author" class="px-4 py-3 border border-[#ede5dc] rounded-lg bg-[#fbf9f6] text-sm focus:outline-none focus:border-[#8c6239] focus:bg-white transition-all" placeholder="예: 코딩하는다람쥐" required>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-[#6e6256]">생생 정보 & 꿀팁 한마디</label>
+                        <textarea id="write-cafe-comment" class="px-4 py-3 border border-[#ede5dc] rounded-lg bg-[#fbf9f6] text-sm h-32 resize-none focus:outline-none focus:border-[#8c6239] focus:bg-white transition-all leading-relaxed" placeholder="예: '구석 두 번째 소파 밑에 개별 멀티탭 콘센트가 있어요!', '재즈가 아주 은은하고 잔잔해서 기계식 갈축 키보드로 작업해도 눈치가 안 보여요.'" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-[#8c6239] hover:bg-[#6d4b2a] text-white py-4 rounded-xl font-bold transition-all shadow-md mt-4 hover:shadow-lg">
+                        실시간 피드 전송하기
+                    </button>
+                </form>
+            </div>
+        </main>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- [PAGE 4] GARDEN PAGE (#garden) -->
+    <!-- ============================================== -->
+    <section id="page-garden" class="page-section hidden">
+        <header class="bg-[#426b3a]/10 border-b border-[#ede5dc] py-10 px-6 text-center">
+            <span class="text-xs font-bold text-[#426b3a] tracking-wider uppercase bg-[#e2f0dc] px-3 py-1 rounded-full">GAMIFICATION</span>
+            <h2 class="text-3xl font-black text-[#2d2620] mt-3 tracking-tight">나의 카공 출석 잔디밭</h2>
+            <p class="text-sm text-[#6e6256] mt-1 max-w-[600px] mx-auto">매일매일 한 잔의 커피와 함께 쌓아올린 가치 있는 작업 일지를 기록하세요!</p>
+        </header>
+
+        <main class="max-w-[900px] mx-auto px-6 py-10">
+            <!-- 출석 카드 대시보드 -->
+            <div class="bg-white border border-[#ede5dc] rounded-3xl p-6 md:p-8 shadow-sm mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="text-xl font-extrabold text-[#2d2620]">🌱 장덕동 열공 카운터</h3>
+                        <p class="text-xs text-[#9e9185] mt-0.5">매장 체크인 시마다 깃허브처럼 초록색 전원 잔디가 채워집니다.</p>
+                    </div>
+                    <div class="bg-[#f5ece3] px-5 py-3 rounded-2xl border border-[#ede5dc]">
+                        <span class="text-xs text-[#8c6239] block font-bold">누적 출석 횟수</span>
+                        <span class="text-2xl font-black text-[#8c6239]"><span id="garden-attendance-total">0</span>회</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto pb-4 scrollbar-thin">
+                    <div class="grass-grid" id="garden-grass-board"></div>
+                </div>
+                <div class="flex justify-end items-center gap-2 text-[10px] text-stone-400 mt-2">
+                    <span>적음</span>
+                    <div class="w-2.5 h-2.5 rounded-sm grass-level-0"></div>
+                    <div class="w-2.5 h-2.5 rounded-sm grass-level-1"></div>
+                    <div class="w-2.5 h-2.5 rounded-sm grass-level-2"></div>
+                    <div class="w-2.5 h-2.5 rounded-sm grass-level-3"></div>
+                    <div class="w-2.5 h-2.5 rounded-sm grass-level-4"></div>
+                    <span>초집중 열공! 🔥</span>
+                </div>
+            </div>
+
+            <!-- 업적 칭호 보드 -->
+            <div class="bg-white border border-[#ede5dc] rounded-3xl p-6 md:p-8 shadow-sm">
+                <h4 class="text-lg font-bold text-[#2d2620] mb-4">🏆 개발 탐험가 업적 현황</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div id="badge-novice" class="flex items-center gap-3 p-4 border border-dashed border-[#ede5dc] rounded-2xl grayscale transition-all">
+                        <span class="text-3xl">🌱</span>
+                        <div>
+                            <p class="text-sm font-bold text-[#2d2620]">카공 새내기</p>
+                            <p class="text-xs text-[#9e9185]">출석 체크 1회 이상 완료</p>
+                        </div>
+                    </div>
+                    <div id="badge-hobby" class="flex items-center gap-3 p-4 border border-dashed border-[#ede5dc] rounded-2xl grayscale transition-all">
+                        <span class="text-3xl">☕</span>
+                        <div>
+                            <p class="text-sm font-bold text-[#2d2620]">커피 매니아</p>
+                            <p class="text-xs text-[#9e9185]">출석 체크 5회 이상 완료</p>
+                        </div>
+                    </div>
+                    <div id="badge-pro" class="flex items-center gap-3 p-4 border border-dashed border-[#ede5dc] rounded-2xl grayscale transition-all">
+                        <span class="text-3xl">🔥</span>
+                        <div>
+                            <p class="text-sm font-bold text-[#2d2620]">지옥의 디버거</p>
+                            <p class="text-xs text-[#9e9185]">출석 체크 15회 이상 완료</p>
+                        </div>
+                    </div>
+                    <div id="badge-master" class="flex items-center gap-3 p-4 border border-dashed border-[#ede5dc] rounded-2xl grayscale transition-all">
+                        <span class="text-3xl">👑</span>
+                        <div>
+                            <p class="text-sm font-bold text-[#2d2620]">장덕동 마스터</p>
+                            <p class="text-xs text-[#9e9185]">출석 체크 30회 이상 완료</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- [MODAL] 상세 스펙 모달 (혼잡도 투표 탑재) -->
+    <!-- ============================================== -->
+    <div id="specModal" class="modal fixed inset-0 z-[1000] hidden justify-center items-center p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-[500px] w-full relative border border-[#ede5dc] shadow-2xl animate-fade">
+            <span class="close-btn absolute top-5 right-6 text-2xl font-bold cursor-pointer text-[#9e9185] hover:text-[#2d2620]" onclick="closeModal('specModal')">&times;</span>
+            <h3 id="modalCafeName" class="text-2xl font-black text-[#8c6239] mb-2 pr-6">카페 이름</h3>
+            <p id="modalEnv" class="text-xs text-[#8c6239] bg-[#f5ece3] px-3.5 py-2.5 rounded-xl font-bold border border-[#ede5dc] mb-5 leading-relaxed">환경 정보</p>
+            
+            <div class="space-y-4 bg-[#fbf9f6] p-5 rounded-2xl border border-[#ede5dc] mb-5">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="font-bold text-[#6e6256]">🔌 충전 및 테이블 스펙</span>
+                    <span id="modalCodingScore" class="text-amber-400 font-bold tracking-wider text-base"></span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="font-bold text-[#6e6256]">☕ 커피 및 디저트 품질</span>
+                    <span id="modalCoffeeScore" class="text-amber-400 font-bold tracking-wider text-base"></span>
+                </div>
+                <div class="border-t border-dashed border-[#ede5dc] pt-3 mt-3">
+                    <p id="modalComment" class="text-xs text-[#6e6256] italic leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- 실시간 크라우드소싱 투표 폼 -->
+            <div class="border-t border-dashed border-[#ede5dc] pt-5">
+                <p class="text-sm font-extrabold text-[#2d2620] mb-1">🚦 실시간 현황 투표하기</p>
+                <p class="text-[10px] text-[#9e9185] mb-3">현재 이곳에서 공부 중이신가요? 공간 정보를 공유해 다른 코더들에게 도움을 주세요!</p>
+                
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-[10px] font-bold text-[#6e6256] block mb-1.5">실시간 혼잡 정도</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="btn-vote-cong py-2 bg-white hover:bg-[#ede5dc] border border-[#ede5dc] rounded-xl text-xs font-bold transition-all" id="vote-c-free" onclick="castVote('free')">🟢 여유</button>
+                            <button class="btn-vote-cong py-2 bg-white hover:bg-[#ede5dc] border border-[#ede5dc] rounded-xl text-xs font-bold transition-all" id="vote-c-normal" onclick="castVote('normal')">🟡 보통</button>
+                            <button class="btn-vote-cong py-2 bg-white hover:bg-[#ede5dc] border border-[#ede5dc] rounded-xl text-xs font-bold transition-all" id="vote-c-full" onclick="castVote('full')">🔴 만석</button>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-[#6e6256] block mb-1.5">실시간 소음 환경</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="btn-vote-noise py-2 bg-white hover:bg-[#ede5dc] border border-[#ede5dc] rounded-xl text-xs font-bold transition-all" id="vote-n-quiet" onclick="castVote('quiet')">🔇 조용함</button>
+                            <button class="btn-vote-noise py-2 bg-white hover:bg-[#ede5dc] border border-[#ede5dc] rounded-xl text-xs font-bold transition-all" id="vote-n-moderate" onclick="castVote('moderate')">🔉 적당함</button>
+                            <button class="btn-vote-noise py-2 bg-white hover:bg-[#ede5dc] border border-[#ede5dc] rounded-xl text-xs font-bold transition-all" id="vote-n-loud" onclick="castVote('loud')">🔊 소란함</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-2">
+                <button id="modal-attendance-btn" class="w-full bg-[#2d2620] hover:bg-black text-white py-3.5 rounded-xl font-bold text-xs md:text-sm transition-all shadow flex justify-center items-center gap-1">
+                    💻 여기서 공부 시작하기 (출석체크)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 커스텀 토스트 알림창 -->
+    <div id="toast" class="toast-container">
+        <span id="toast-icon">☕</span>
+        <span id="toast-text">알림 메세지</span>
+    </div>
+
+    <script>
+        // 고품질 보물 카공 리스트 데이터베이스
+        const cafeDatabase = [
+            {
+                id: "hollys",
+                name: "할리스 광주장덕점",
+                category: "focus",
+                address: "광주 광산구 장덕동 중심상가로 23",
+                desc: "2인 전용 프리미엄 카공 전용 테이블과 콘센트가 기본 구비되어 독서실 수준의 초강력 집중력을 선사합니다.",
+                env: "⚡ 좌석마다 멀티탭 장착 | 🪑 카공 전용 칸막이 독서 데스크 보유",
+                codingScore: "⭐⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐",
+                comment: "눈치 안 보고 가동 가능한 대형 프랜차이즈의 정석이자 압도적인 테이블 세팅을 자랑합니다.",
+                tags: ["#콘센트많음", "#대형테이블", "#조용함"],
+                img: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600"
+            },
+            {
+                id: "twosome",
+                name: "투썸플레이스 광주장덕점",
+                category: "focus",
+                address: "광주 광산구 장덕로 56 수완가든빌딩",
+                desc: "막힘 없이 넓은 와이드 4인용 테이블이 대거 배치되어 두툼한 전공책이나 듀얼 모니터를 세팅하기에 매우 뛰어납니다.",
+                env: "⚡ 벽면 테이블 콘센트 풍부 | 🪑 널찍하고 쾌적한 테이블 배치",
+                codingScore: "⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐",
+                comment: "아이스박스 하나 곁들여서 오랫동안 웹 프로젝트의 기본 아키텍처를 빌드업하기 최고의 요새입니다.",
+                tags: ["#대형테이블", "#주차가능", "#디카페인"],
+                img: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=600"
+            },
+            {
+                id: "starbucks",
+                name: "스타벅스 광주장덕DT점",
+                category: "focus",
+                address: "광주 광산구 장덕동 수완지구 남로 12",
+                desc: "2층의 조용하고 은은한 우드톤 롱테이블 존이 상시 제공되며, 특유의 감미로운 재즈 음악과 함께 코딩에 몰입하기 좋습니다.",
+                env: "⚡ 중앙 대형 공유 테이블에 다수 콘센트 | 🪑 쾌적한 원목 체어",
+                codingScore: "⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐",
+                comment: "아침 일찍 갓 추출한 아메리카노와 함께 테크 관련 기술 블로그나 튜토리얼을 공부하기에 편안한 장소입니다.",
+                tags: ["#주차가능", "#디카페인", "#대형테이블"],
+                img: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=600"
+            },
+            {
+                id: "pascucci",
+                name: "파스쿠찌 광주장덕로점",
+                category: "focus",
+                address: "광주 광산구 장덕초사거리 대로변 190",
+                desc: "고급스러운 붉은 가죽 소파 좌석과 함께 가구마다 기둥 콘센트가 밀착되어 있어 저녁 늦은 시간 야간 코딩 작업에 안성맞춤입니다.",
+                env: "⚡ 소파 하단 전원포트 완비 | 🪑 인체공학적 가죽 좌석",
+                codingScore: "⭐⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐",
+                comment: "밀도가 높지 않고 천장이 높아 답답함 없이 장시간 코딩에 초집중할 수 있는 히든 대형 플레이스입니다.",
+                tags: ["#콘센트많음", "#24시간"],
+                img: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=600"
+            },
+            {
+                id: "florian",
+                name: "카페 플로리안 장덕",
+                category: "mood",
+                address: "광주 광산구 장덕동 수완 휴먼시아 1단지 상가골목",
+                desc: "은은하고 따뜻한 촛불 조명과 미니멀한 이지리스닝 음악 덕분에 차분히 UI/UX 디자인이나 아이디어 브레인스토밍하기 좋습니다.",
+                env: "⚡ 벽면 하단 전원 플러그 | 🪑 부드러운 하이백 패브릭 소파",
+                codingScore: "⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐⭐",
+                comment: "주말 나른한 오전에 슬리퍼 끌고 나와 릴랙스하며 간단히 스케치하기 좋은 고요한 보금자리입니다.",
+                tags: ["#소형개인석", "#조용함"],
+                img: "https://images.unsplash.com/photo-1498804103079-a6351b050096?q=80&w=600"
+            },
+            {
+                id: "cozywood",
+                name: "아늑 공간 원목카페",
+                category: "mood",
+                address: "광주 광산구 장덕동 조용한 전원주택단지 골목 5-3",
+                desc: "초록 식물들이 가득해 숲속에 온 듯 피톤치드 힐링을 주는 인테리어. 귀가 편안한 백색소음으로 백엔드 API 설계에 최적입니다.",
+                env: "⚡ 바닥 매립형 콘센트 제공 | 🪑 프리미엄 수제 원목 테이블",
+                codingScore: "⭐⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐",
+                comment: "화려하고 시끄러운 프랜차이즈에 질려 완벽한 고독과 몰입이 필요할 때 최적의 히든 보물창고입니다.",
+                tags: ["#조용함", "#소형개인석", "#디카페인"],
+                img: "https://images.unsplash.com/photo-1507133750040-4a8f57021571?q=80&w=600"
+            },
+            {
+                id: "moodgarden",
+                name: "무드 가든 앤 커피",
+                category: "mood",
+                address: "광주 광산구 장덕동 성덕공원 서편 카페골목",
+                desc: "큰 통유리 통창 너머로 성덕공원의 푸르른 계절 풍경이 훤히 비치는 힐링 스팟으로 코딩에 지친 시각적 긴장감을 날려줍니다.",
+                env: "⚡ 유리창 사이드 바 좌석 배치 | 🪑 가볍고 슬림한 철제 라인 체어",
+                codingScore: "⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐⭐",
+                comment: "막혔던 기획 아이디어가 확 풀릴 만큼 전경이 무척 시원시원합니다.",
+                tags: ["#소형개인석", "#주차가능"],
+                img: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?q=80&w=600"
+            },
+            {
+                id: "bruno",
+                name: "카페 브루노",
+                category: "mood",
+                address: "광주 광산구 장덕동 성덕중학교 뒤편 주택가 18",
+                desc: "미드센추리 모던 풍 인테리어와 시그니처 크림 커피가 조화로운 곳으로, 분위기 있게 태블릿 작업이나 개발 서적 탐독을 추천합니다.",
+                env: "⚡ 일부 좌석 하부 전원포트 수집 | 🪑 심플한 레트로풍 체어",
+                codingScore: "⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐",
+                comment: "감성을 만끽하며 간단히 마크업 코딩하거나 노션 대시보드 정리할 때 강력 추천합니다.",
+                tags: ["#소형개인석", "#디카페인"],
+                img: "https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=600"
+            },
+            {
+                id: "butterroom",
+                name: "버터룸 베이커리",
+                category: "bakery",
+                address: "광주 광산구 장덕동 먹자골목 인접 구역 91",
+                desc: "매장에서 매시간 갓 구워내는 버터향 가득 에그타르트 명소. 알고리즘 풀이 중 머리에 당이 텅 비어버렸을 때 극약처방 스팟.",
+                env: "⚡ 창가 미니 롱데스크 배치 | 🪑 공간은 다소 아담함",
+                codingScore: "⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐⭐",
+                comment: "에그타르트 풍미가 최고라 당 충전 즉시 키보드를 두드리는 속도가 비약적으로 업그레이드됩니다.",
+                tags: ["#소형개인석"],
+                img: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=600"
+            },
+            {
+                id: "saltbread",
+                name: "소금빵과 크림라떼",
+                category: "bakery",
+                address: "광주 광산구 장덕초 인근 한적 골목 101-1",
+                desc: "겉은 바삭하고 속은 쫄깃한 명품 소금빵 제조처. 오후 2시 이후 조용하고 평화로워져 소금빵에 기획 초안을 짜기 좋습니다.",
+                env: "⚡ 벽면 라운드 존 좌석 위주 지원 | 🪑 가벼운 카페식 체어",
+                codingScore: "⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐⭐",
+                comment: "빵 나오는 시간(오전 11시, 오후 3시) 살짝 빗겨 방문하면 천국의 워크스페이스가 열립니다.",
+                tags: ["#소형개인석", "#조용함"],
+                img: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?q=80&w=600"
+            },
+            {
+                id: "peach",
+                name: "피치 크루아상 팩토리",
+                category: "bakery",
+                address: "광주 광산구 장덕동 근린공원 옆길상가 14",
+                desc: "바삭바삭한 식감의 크루아상 전문 베이커리. 넓은 사이드 쇼파 공간이 의외로 넓고 한적하여 코딩 러버들의 숨겨진 단골 빵집.",
+                env: "⚡ 소파 라인 아래 멀티탭 보유 | 🪑 길고 편안한 소파석",
+                codingScore: "⭐⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐⭐",
+                comment: "초코 듬뿍 묻은 빨미까레 하나 쪼개 먹으며 디버깅 작업 시, 극상의 업무 퍼포먼스를 만들어 줍니다.",
+                tags: ["#대형테이블", "#콘센트많음"],
+                img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=600"
+            },
+            {
+                id: "moka",
+                name: "파티세리 모카",
+                category: "bakery",
+                address: "광주 광산구 장덕동 주공단지 정문 건너편",
+                desc: "달지 않고 고급스러운 맛의 조각 케이크와 프랑스식 정통 제과류가 준비되어 조용한 오후 지친 뇌 세포를 완전히 리밸런싱 해줍니다.",
+                env: "⚡ 중앙 미니 테이블 콘센트 완비 | 🪑 스칸디나비아풍 원목의자",
+                codingScore: "⭐⭐⭐",
+                coffeeScore: "⭐⭐⭐⭐⭐",
+                comment: "과일 생크림 케이크가 입안에서 살살 녹아 버그로 뒤틀린 심신을 사르르 진정시켜줍니다.",
+                tags: ["#소형개인석", "#디카페인"],
+                img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=600"
+            }
+        ];
+
+        // 기본 커뮤니티 데이터 아카이브
+        const initialReviews = [
+            {
+                id: 1,
+                cafeName: "할리스 광주장덕점",
+                score: "⭐⭐⭐⭐⭐",
+                scoreNum: 5,
+                comment: "진심으로 독서실처럼 전용 아크릴 칸막이 존이 설치되어 있어서 과제나 깃허브 작업할 때 집중도가 최고 수준입니다.",
+                author: "장덕동웹마스터",
+                time: "2026-07-12"
+            },
+            {
+                id: 2,
+                cafeName: "버터룸 베이커리",
+                score: "⭐⭐⭐⭐",
+                scoreNum: 4,
+                comment: "에그타르트 진짜 인생 맛집입니다. 테이블이 아주 많지는 않지만 노트북 한 대 들고 가벼운 오류 코드 분석할 때 당 충전되고 아주 좋습니다!",
+                author: "광산구파이썬러",
+                time: "2026-07-11"
+            },
+            {
+                id: 3,
+                cafeName: "아늑 공간 원목카페",
+                score: "⭐⭐⭐⭐⭐",
+                scoreNum: 5,
+                comment: "정말로 분위기가 숲속 도서관 같아서 무접점 키보드 타건하기도 눈치 덜 보이고 쾌적하게 백엔드 구현 끝마쳤습니다.",
+                author: "백엔드러너",
+                time: "2026-07-10"
+            }
+        ];
+
+        // 로컬 데이터 상태 관리
+        let activeTagFilters = [];
+        let bookmarks = JSON.parse(localStorage.getItem('mp_cafe_bookmarks')) || [];
+        let voteData = JSON.parse(localStorage.getItem('mp_cafe_votes')) || {};
+        let attendanceData = JSON.parse(localStorage.getItem('mp_cafe_attendance')) || {};
+        let customReviews = JSON.parse(localStorage.getItem('mp_cafe_reviews')) || [];
+        
+        let currentTheme = 'all';
+        let detailCafeId = "";
+        let selectedWriteRating = 5; // 기본 별점 5점
+
+        // Swiper 인스턴스 저장소
+        let focusSwiper, moodSwiper, bakerySwiper;
+
+        // 초기 시작
+        window.addEventListener('DOMContentLoaded', () => {
+            initRouter();
+            populateCafeSelection();
+            renderSwiperSlides();
+            initSwipers();
+            updateTotalAttendanceUI();
+            renderGrassBoard();
+            renderReviews();
+            setWriteRating(selectedWriteRating); // 별점 시스템 초기화
+        });
+
+        // ==============================================
+        // 🚀 가상 라우터 (Hash-based Router)
+        // ==============================================
+        function initRouter() {
+            window.addEventListener('hashchange', routeChange);
+            // 진입 시 해시가 없거나 잘못되었으면 #home으로 세팅
+            if (!window.location.hash) {
+                window.location.hash = '#home';
+            } else {
+                routeChange();
+            }
+        }
+
+        function routeChange() {
+            const hash = window.location.hash || '#home';
+            const pages = document.querySelectorAll('.page-section');
+            pages.forEach(p => {
+                p.classList.remove('active');
+                p.classList.add('hidden');
+            });
+
+            // 네비게이션 키컬러 초기화
+            document.querySelectorAll('.nav-link-item').forEach(el => {
+                el.classList.remove('active-nav');
+                el.classList.add('text-[#6e6256]');
+            });
+
+            // 모바일 탭 바 키컬러 초기화
+            document.querySelectorAll('[id^="m-nav-"]').forEach(el => {
+                el.classList.remove('text-[#8c6239]');
+                el.classList.add('text-[#6e6256]');
+            });
+
+            // 주소 변경 매칭 처리
+            if (hash.startsWith('#home')) {
+                const target = document.getElementById('page-home');
+                target.classList.remove('hidden');
+                setTimeout(() => target.classList.add('active'), 10);
+                document.getElementById('nav-home').classList.add('active-nav');
+                document.getElementById('m-nav-home').classList.add('text-[#8c6239]');
+                
+                // Swiper 갱신 필수
+                setTimeout(() => {
+                    if (focusSwiper) focusSwiper.update();
+                    if (moodSwiper) moodSwiper.update();
+                    if (bakerySwiper) bakerySwiper.update();
+                }, 150);
+            } 
+            else if (hash.startsWith('#reviews')) {
+                const target = document.getElementById('page-reviews');
+                target.classList.remove('hidden');
+                setTimeout(() => target.classList.add('active'), 10);
+                document.getElementById('nav-reviews').classList.add('active-nav');
+                document.getElementById('m-nav-reviews').classList.add('text-[#8c6239]');
+                renderReviews();
+            } 
+            else if (hash.startsWith('#write')) {
+                const target = document.getElementById('page-write');
+                target.classList.remove('hidden');
+                setTimeout(() => target.classList.add('active'), 10);
+                document.getElementById('nav-write').classList.add('active-nav');
+                document.getElementById('m-nav-write').classList.add('text-[#8c6239]');
+            } 
+            else if (hash.startsWith('#garden')) {
+                const target = document.getElementById('page-garden');
+                target.classList.remove('hidden');
+                setTimeout(() => target.classList.add('active'), 10);
+                document.getElementById('nav-garden').classList.add('active-nav');
+                document.getElementById('m-nav-garden').classList.add('text-[#8c6239]');
+                renderGrassBoard();
+                updateTotalAttendanceUI();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+
+        function navigate(dest) {
+            window.location.hash = `#${dest}`;
+        }
+
+        // ==============================================
+        // 🏡 HOME PAGE LOGIC
+        // ==============================================
+        function populateCafeSelection() {
+            const selectEl = document.getElementById('write-cafe-select');
+            selectEl.innerHTML = cafeDatabase.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        }
+
+        function renderSwiperSlides() {
+            const focusWrapper = document.getElementById('swiper-wrapper-focus');
+            const moodWrapper = document.getElementById('swiper-wrapper-mood');
+            const bakeryWrapper = document.getElementById('swiper-wrapper-bakery');
+
+            focusWrapper.innerHTML = '';
+            moodWrapper.innerHTML = '';
+            bakeryWrapper.innerHTML = '';
+
+            cafeDatabase.forEach(cafe => {
+                const cardHTML = generateCardHTML(cafe, 'swiper-slide');
+                if (cafe.category === 'focus') focusWrapper.insertAdjacentHTML('beforeend', cardHTML);
+                if (cafe.category === 'mood') moodWrapper.insertAdjacentHTML('beforeend', cardHTML);
+                if (cafe.category === 'bakery') bakeryWrapper.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        function initSwipers() {
+            if (focusSwiper) focusSwiper.destroy();
+            if (moodSwiper) moodSwiper.destroy();
+            if (bakerySwiper) bakerySwiper.destroy();
+
+            const swiperConfig = (prev, next) => ({
+                loop: true,
+                slidesPerView: 1,
+                spaceBetween: 16,
+                grabCursor: true,
+                navigation: { nextEl: next, prevEl: prev },
+                breakpoints: {
+                    640: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 3, spaceBetween: 24 }
+                }
+            });
+
+            focusSwiper = new Swiper('#viewport-focus', swiperConfig('.btn-prev-focus', '.btn-next-focus'));
+            moodSwiper = new Swiper('#viewport-mood', swiperConfig('.btn-prev-mood', '.btn-next-mood'));
+            bakerySwiper = new Swiper('#viewport-bakery', swiperConfig('.btn-prev-bakery', '.btn-next-bakery'));
+        }
+
+        function generateCardHTML(cafe, layoutClass) {
+            const isBookmarked = bookmarks.includes(cafe.id) ? 'active' : '';
+            const tagHTML = cafe.tags.map(t => `<span class="text-[10px] bg-[#f5ece3] text-[#8c6239] font-bold px-2 py-0.5 rounded">${t}</span>`).join('');
+            
+            const cVote = getLiveStatus(cafe.id, 'congestion', '🟢 여유');
+            const nVote = getLiveStatus(cafe.id, 'noise', '🔇 조용함');
+
+            return `
+                <div class="${layoutClass}">
+                    <div class="cafe-card">
+                        <div class="cafe-img-wrapper">
+                            <img src="${cafe.img}" class="cafe-img" alt="${cafe.name}">
+                            <span class="absolute top-3 left-3 bg-stone-900/80 text-white text-[10px] font-bold px-2 py-1 rounded">
+                                ${cafe.category === 'focus' ? '대형&집중' : cafe.category === 'mood' ? '감성&리프레시' : '디저트맛집'}
+                            </span>
+                            <button class="bookmark-btn ${isBookmarked} absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-10" onclick="toggleBookmark('${cafe.id}', event)">
+                                <svg class="w-4 h-4 fill-stone-400 pointer-events-none transition-colors" viewBox="0 0 24 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between bg-white">
+                            <div>
+                                <h4 class="text-base font-extrabold text-[#2d2620] mb-1 line-clamp-1">${cafe.name}</h4>
+                                <p class="text-xs text-[#9e9185] flex items-center gap-1 mb-2 line-clamp-1">📍 ${cafe.address}</p>
+                                
+                                <div class="live-indicators py-1 px-2.5 mb-3 bg-[#fbf9f6] border border-dashed border-[#ede5dc] rounded-lg text-[10px] flex gap-3">
+                                    <div class="flex items-center gap-1">
+                                        <span class="indicator-dot ${getDotColor(cVote)}"></span>
+                                        <span>혼잡: <b>${cVote}</b></span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="indicator-dot ${getDotColor(nVote)}"></span>
+                                        <span>소음: <b>${nVote}</b></span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-[#6e6256] line-clamp-2 leading-relaxed mb-3 h-[36px]">${cafe.desc}</p>
+                            </div>
+                            <div>
+                                <div class="flex flex-wrap gap-1 mb-3">${tagHTML}</div>
+                                <div class="grid grid-cols-2 gap-2 mt-auto">
+                                    <button class="bg-[#8c6239] hover:bg-[#6d4b2a] text-white py-2.5 rounded-xl text-xs font-bold transition-colors" onclick="openSpecModal('${cafe.id}')">🔍 상세 스펙</button>
+                                    <button class="bg-[#2d2620] hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition-colors" onclick="checkIn('${cafe.id}', event)">💻 작업시작</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getLiveStatus(cafeId, type, fallback) {
+            if (voteData[cafeId] && voteData[cafeId][type]) {
+                const val = voteData[cafeId][type];
+                if (val === 'free') return '🟢 여유';
+                if (val === 'normal') return '🟡 보통';
+                if (val === 'full') return '🔴 만석';
+                if (val === 'quiet') return '🔇 조용함';
+                if (val === 'moderate') return '🔉 적당함';
+                if (val === 'loud') return '🔊 소란함';
+            }
+            return fallback;
+        }
+
+        function getDotColor(text) {
+            if (text.includes('여유') || text.includes('조용함')) return 'dot-green';
+            if (text.includes('보통') || text.includes('적당함')) return 'dot-yellow';
+            return 'dot-red';
+        }
+
+        function toggleBookmark(cafeId, event) {
+            if (event) event.stopPropagation();
+            const idx = bookmarks.indexOf(cafeId);
+            if (idx > -1) {
+                bookmarks.splice(idx, 1);
+                showToast('아지트 폴더에서 해제되었습니다. 🤍');
+            } else {
+                bookmarks.push(cafeId);
+                showToast('나만의 아지트에 등록되었습니다! 💖');
+            }
+            localStorage.setItem('mp_cafe_bookmarks', JSON.stringify(bookmarks));
+            renderSwiperSlides();
+            initSwipers();
+            handleSearch();
+        }
+
+        function toggleTagFilter(tag, element) {
+            const idx = activeTagFilters.indexOf(tag);
+            if (idx > -1) {
+                activeTagFilters.splice(idx, 1);
+                element.classList.remove('bg-[#f5ece3]', 'text-[#8c6239]', 'border-[#accent]');
+                element.classList.add('bg-[#fbf9f6]', 'text-[#6e6256]');
+            } else {
+                activeTagFilters.push(tag);
+                element.classList.add('bg-[#f5ece3]', 'text-[#8c6239]', 'border-[#accent]');
+                element.classList.remove('bg-[#fbf9f6]', 'text-[#6e6256]');
+            }
+            handleSearch();
+        }
+
+        function filterCafes(category, element) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-[#8c6239]', 'shadow-sm');
+                btn.classList.add('text-[#6e6256]');
+            });
+            element.classList.remove('text-[#6e6256]');
+            element.classList.add('bg-white', 'text-[#8c6239]', 'shadow-sm');
+
+            currentTheme = category;
+            if (category === 'bookmark') {
+                document.getElementById('smart-search').value = '';
+            }
+            handleSearch();
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('smart-search').value.toLowerCase().trim();
+            const resultsView = document.getElementById('results-view');
+            const resultsGrid = document.getElementById('results-grid-container');
+
+            const focusBlock = document.getElementById('category-focus');
+            const moodBlock = document.getElementById('category-mood');
+            const bakeryBlock = document.getElementById('category-bakery');
+
+            const filtered = cafeDatabase.filter(cafe => {
+                if (currentTheme !== 'all' && currentTheme !== 'bookmark' && cafe.category !== currentTheme) return false;
+                if (currentTheme === 'bookmark' && !bookmarks.includes(cafe.id)) return false;
+
+                if (activeTagFilters.length > 0) {
+                    const hasAllTags = activeTagFilters.every(tag => cafe.tags.includes(tag));
+                    if (!hasAllTags) return false;
+                }
+
+                if (query.length > 0) {
+                    const nameMatch = cafe.name.toLowerCase().includes(query);
+                    const addrMatch = cafe.address.toLowerCase().includes(query);
+                    if (!nameMatch && !addrMatch) return false;
+                }
+
+                return true;
+            });
+
+            const isSearching = query.length > 0 || activeTagFilters.length > 0 || currentTheme === 'bookmark' || (currentTheme !== 'all' && currentTheme !== 'bookmark');
+
+            if (isSearching) {
+                focusBlock.classList.add('hidden');
+                moodBlock.classList.add('hidden');
+                bakeryBlock.classList.add('hidden');
+
+                resultsView.classList.remove('hidden');
+                resultsGrid.innerHTML = filtered.map(cafe => generateCardHTML(cafe, 'grid-item')).join('');
+                
+                let titlePrefix = "🔍 통합 필터링 결과";
+                if (currentTheme === 'bookmark') titlePrefix = "💖 나의 전용 보관함 아지트";
+                document.getElementById('results-title').innerHTML = `${titlePrefix} <span class="text-xs bg-[#f5ece3] text-[#8c6239] px-2 py-0.5 rounded-full font-bold ml-1">${filtered.length}개 발견</span>`;
+            } else {
+                focusBlock.classList.remove('hidden');
+                moodBlock.classList.remove('hidden');
+                bakeryBlock.classList.remove('hidden');
+                resultsView.classList.add('hidden');
+                
+                setTimeout(() => {
+                    if (focusSwiper) focusSwiper.update();
+                    if (moodSwiper) moodSwiper.update();
+                    if (bakerySwiper) bakerySwiper.update();
+                }, 50);
+            }
+        }
+
+        // ==============================================
+        // 💻 DETAIL SPEC MODAL
+        // ==============================================
+        function openSpecModal(cafeId) {
+            detailCafeId = cafeId;
+            const cafe = cafeDatabase.find(c => c.id === cafeId);
+            if (!cafe) return;
+
+            document.getElementById('modalCafeName').innerText = cafe.name;
+            document.getElementById('modalEnv').innerText = cafe.env;
+            document.getElementById('modalCodingScore').innerText = cafe.codingScore;
+            document.getElementById('modalCoffeeScore').innerText = cafe.coffeeScore;
+            document.getElementById('modalComment').innerText = `💬 마스터 가이드: "${cafe.comment}"`;
+
+            document.getElementById('modal-attendance-btn').onclick = (e) => {
+                checkIn(cafeId, e);
+            };
+
+            refreshDetailLiveStatus(cafeId);
+            document.getElementById('specModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function refreshDetailLiveStatus(cafeId) {
+            document.querySelectorAll('.btn-vote-cong, .btn-vote-noise').forEach(b => {
+                b.classList.remove('bg-[#8c6239]', 'text-white');
+                b.classList.add('bg-white', 'text-[#6e6256]');
+            });
+
+            if (voteData[cafeId]) {
+                const cVal = voteData[cafeId].congestion;
+                const nVal = voteData[cafeId].noise;
+                if (cVal) {
+                    const btn = document.getElementById(`vote-c-${cVal}`);
+                    if (btn) {
+                        btn.classList.add('bg-[#8c6239]', 'text-white');
+                        btn.classList.remove('bg-white', 'text-[#6e6256]');
+                    }
+                }
+                if (nVal) {
+                    const btn = document.getElementById(`vote-n-${nVal}`);
+                    if (btn) {
+                        btn.classList.add('bg-[#8c6239]', 'text-white');
+                        btn.classList.remove('bg-white', 'text-[#6e6256]');
+                    }
+                }
+            }
+        }
+
+        function castVote(optionValue) {
+            if (!detailCafeId) return;
+
+            if (!voteData[detailCafeId]) {
+                voteData[detailCafeId] = {};
+            }
+
+            const isCongestion = ['free', 'normal', 'full'].includes(optionValue);
+            
+            if (isCongestion) {
+                voteData[detailCafeId].congestion = optionValue;
+                showToast('혼잡도가 투표되었습니다! 🚦');
+            } else {
+                voteData[detailCafeId].noise = optionValue;
+                showToast('소음도가 투표되었습니다! 🔇');
+            }
+
+            localStorage.setItem('mp_cafe_votes', JSON.stringify(voteData));
+            refreshDetailLiveStatus(detailCafeId);
+            renderSwiperSlides();
+            initSwipers();
+            handleSearch();
+        }
+
+        // ==============================================
+        // 💬 REVIEWS FEED PAGE LOGIC
+        // ==============================================
+        function renderReviews() {
+            const container = document.getElementById('reviews-list-container');
+            if (!container) return;
+
+            const searchVal = document.getElementById('reviews-search-input').value.toLowerCase().trim();
+            const sortBy = document.getElementById('reviews-sort-select').value;
+            container.innerHTML = '';
+
+            const allReviews = [...customReviews, ...initialReviews];
+
+            // 전용 정보 통계 위젯 업데이트
+            document.getElementById('widget-total-reviews').innerText = `${allReviews.length}개`;
+
+            // 검색 필터링
+            let filteredReviews = allReviews.filter(rev => {
+                if (searchVal.length > 0) {
+                    return rev.cafeName.toLowerCase().includes(searchVal) || rev.comment.toLowerCase().includes(searchVal);
+                }
+                return true;
+            });
+
+            // 정렬
+            if (sortBy === 'latest') {
+                // 시간이나 ID 기준 내림차순 정렬 (최신이 먼저)
+                filteredReviews.sort((a, b) => b.id - a.id);
+            } else if (sortBy === 'high-score') {
+                filteredReviews.sort((a, b) => b.scoreNum - a.scoreNum);
+            } else if (sortBy === 'low-score') {
+                filteredReviews.sort((a, b) => a.scoreNum - b.scoreNum);
+            }
+
+            if (filteredReviews.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 py-12 text-center text-[#9e9185] font-semibold bg-white border border-[#ede5dc] rounded-2xl shadow-sm">
+                        🧐 조건에 만족하는 한줄평 리뷰가 없습니다.
+                    </div>
+                `;
+                return;
+            }
+
+            filteredReviews.forEach(rev => {
+                const html = `
+                    <div class="bg-white p-5 rounded-2xl border border-[#ede5dc] border-l-4 border-l-[#8c6239] shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                        <div>
+                            <div class="flex justify-between items-center mb-2.5">
+                                <span class="font-extrabold text-[#2d2620] text-sm md:text-base">${rev.cafeName}</span>
+                                <span class="text-amber-400 font-bold text-xs">${rev.score}</span>
+                            </div>
+                            <p class="text-xs md:text-sm text-[#6e6256] leading-relaxed mb-4">${rev.comment}</p>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-[#9e9185] border-t border-[#fbf9f6] pt-2.5">
+                            <span>👤 작성자: <b>${rev.author}</b></span>
+                            <span>📅 ${rev.time}</span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // ==============================================
+        // ✍️ WRITE REVIEW PAGE LOGIC
+        // ==============================================
+        function setWriteRating(stars) {
+            selectedWriteRating = stars;
+            const starElements = document.querySelectorAll('#interactive-star-container .rating-star');
+            starElements.forEach(el => {
+                const val = parseInt(el.getAttribute('data-value'));
+                if (val <= stars) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+
+            const textBadge = document.getElementById('star-score-text');
+            const scoreLabels = {
+                1: '⭐ 별로예요 (작업 불편)',
+                2: '⭐⭐ 애매해요 (간단히만 추천)',
+                3: '⭐⭐⭐ 무난해요 (보통 수준)',
+                4: '⭐⭐⭐⭐ 우수해요 (작업 편리)',
+                5: '⭐⭐⭐⭐⭐ 최고예요 (초강력 몰입!)'
+            };
+            textBadge.innerText = scoreLabels[stars];
+        }
+
+        function submitNewReview(event) {
+            event.preventDefault();
+            const cafeName = document.getElementById('write-cafe-select').value;
+            const author = document.getElementById('write-cafe-author').value;
+            const comment = document.getElementById('write-cafe-comment').value;
+
+            // 별점에 맞게 문자열 별 제작
+            let scoreStr = '';
+            for (let i = 0; i < selectedWriteRating; i++) {
+                scoreStr += '⭐';
+            }
+
+            const today = new Date();
+            const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            const newReview = {
+                id: Date.now(), // 고유 정렬을 위한 ID
+                cafeName,
+                score: scoreStr,
+                scoreNum: selectedWriteRating,
+                author,
+                comment,
+                time: formattedDate
+            };
+
+            customReviews.unshift(newReview);
+            localStorage.setItem('mp_cafe_reviews', JSON.stringify(customReviews));
+
+            // 폼 필드 클리어 및 별점 초기화
+            document.getElementById('write-cafe-author').value = '';
+            document.getElementById('write-cafe-comment').value = '';
+            setWriteRating(5);
+
+            showToast('성공적으로 새로운 리뷰를 등록했습니다! ☕');
+            navigate('reviews'); // 즉시 리뷰 피드로 전환
+        }
+
+        // ==============================================
+        // 🌱 GARDEN DASHBOARD LOGIC
+        // ==============================================
+        function checkIn(cafeId, event) {
+            if (event) event.stopPropagation();
+            const today = getTodayDateString();
+            
+            attendanceData[today] = (attendanceData[today] || 0) + 1;
+            localStorage.setItem('mp_cafe_attendance', JSON.stringify(attendanceData));
+
+            const cafe = cafeDatabase.find(c => c.id === cafeId);
+            const name = cafe ? cafe.name : '매장';
+
+            showToast(`💻 ${name} 카공 출석 도장을 찍었습니다! 🌱`, '🌱');
+            closeModal('specModal');
+            
+            renderGrassBoard();
+            updateTotalAttendanceUI();
+        }
+
+        function getTodayDateString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function updateTotalAttendanceUI() {
+            const total = Object.values(attendanceData).reduce((sum, val) => sum + val, 0);
+            const totalEl = document.getElementById('garden-attendance-total');
+            if (totalEl) totalEl.innerText = total;
+
+            // 업적 타이틀 해금 로직
+            if (total >= 1) document.getElementById('badge-novice').classList.remove('grayscale');
+            if (total >= 5) document.getElementById('badge-hobby').classList.remove('grayscale');
+            if (total >= 15) document.getElementById('badge-pro').classList.remove('grayscale');
+            if (total >= 30) document.getElementById('badge-master').classList.remove('grayscale');
+        }
+
+        function renderGrassBoard() {
+            const board = document.getElementById('garden-grass-board');
+            if (!board) return;
+            board.innerHTML = '';
+
+            const totalDays = 126; // 18주 분량
+            const todayObj = new Date();
+            const cells = [];
+
+            for (let i = totalDays - 1; i >= 0; i--) {
+                const targetDate = new Date();
+                targetDate.setDate(todayObj.getDate() - i);
+                
+                const key = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+                const count = attendanceData[key] || 0;
+
+                let level = 0;
+                if (count > 0 && count <= 1) level = 1;
+                else if (count > 1 && count <= 2) level = 2;
+                else if (count > 2 && count <= 3) level = 3;
+                else if (count > 3) level = 4;
+
+                cells.push(`
+                    <div class="grass-cell grass-level-${level}" 
+                         data-date="${key}" 
+                         data-count="${count}"></div>
+                `);
+            }
+            board.innerHTML = cells.join('');
+        }
+
+        // ==============================================
+        // ☕ TOAST MESSAGE
+        // ==============================================
+        function showToast(message, icon = "☕") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-icon').innerText = icon;
+            document.getElementById('toast-text').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 모달 바깥쪽 어두운 영역을 클릭하면 닫히게 처리
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('specModal');
+            if (e.target === modal) {
+                closeModal('specModal');
+            }
+        });
+    </script>
+</body>
+</html>
